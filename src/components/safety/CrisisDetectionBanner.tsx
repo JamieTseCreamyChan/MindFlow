@@ -12,7 +12,7 @@ export function CrisisDetectionBanner({ onAcknowledge }: CrisisDetectionBannerPr
   const router = useRouter();
 
   return (
-    <View style={[styles.container, Shadows.md]}>
+    <View style={styles.container}>
       <Text style={styles.title}>{CRISIS_MESSAGE.title}</Text>
       <Text style={styles.body}>{CRISIS_MESSAGE.body}</Text>
       <TouchableOpacity
@@ -28,8 +28,8 @@ export function CrisisDetectionBanner({ onAcknowledge }: CrisisDetectionBannerPr
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.warningLight,
-    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.warning + '15',
+    borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     margin: Spacing.lg,
     borderLeftWidth: 4,
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSize.lg,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: Colors.warningLight,
     marginBottom: Spacing.sm,
   },
   body: {
@@ -48,10 +48,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   button: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.warning,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.xl,
+    borderRadius: BorderRadius.full,
     alignItems: 'center',
     marginBottom: Spacing.md,
   },

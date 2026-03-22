@@ -1,29 +1,44 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LoadGauge } from '../../src/components/charts/LoadGauge';
+import { LinearGradient } from 'expo-linear-gradient';
+import { StreakCounter } from '../../src/components/dashboard/StreakCounter';
+import { ProgressRings } from '../../src/components/dashboard/ProgressRings';
+import { AchievementCarousel } from '../../src/components/dashboard/AchievementCarousel';
+import { WeeklyStoryCard } from '../../src/components/dashboard/WeeklyStoryCard';
 import { DailySummaryCard } from '../../src/components/dashboard/DailySummaryCard';
 import { SuggestionBanner } from '../../src/components/dashboard/SuggestionBanner';
-import { Button } from '../../src/components/ui/Button';
 import { useDigitalLoad } from '../../src/hooks/useDigitalLoad';
+import { useGamification } from '../../src/hooks/useGamification';
 import { useSuggestions } from '../../src/hooks/useSuggestions';
-import { Colors, FontSize, Spacing } from '../../src/constants/theme';
+import { Colors, Gradients, FontSize, Spacing, Shadows } from '../../src/constants/theme';
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
 
 export default function Dashboard() {
   const router = useRouter();
-  const { logs, getTodayLog, computeLoadScore, getRecentLogs } =
-    useDigitalLoad();
+  const { logs, getTodayLog, getRecentLogs } = useDigitalLoad();
+  const { progress, unlockedAchievements } = useGamification();
   const { activeSuggestions, refresh, dismiss } = useSuggestions(logs);
 
   const todayLog = getTodayLog();
-  const loadScore = todayLog ? computeLoadScore(todayLog) : 0;
   const recentLogs = getRecentLogs(7);
 
   useEffect(() => {
-    if (logs.length > 0) {
-      refresh();
-    }
+    if (logs.length > 0) refresh();
   }, [logs.length]);
+
+  const screenTimeGoalHours = 6;
+  const todayScreenHours = todayLog ? todayLog.screenTimeMinutes / 60 : 0;
+  const avgMood =
+    recentLogs.length > 0
+      ? recentLogs.reduce((s, l) => s + l.moodRating, 0) / recentLogs.length
+      : 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,81 +46,66 @@ export default function Dashboard() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={styles.greeting}>MindFlow</Text>
-          <Text style={styles.date}>
-            {new Date().toLocaleDateString('en-AU', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-            })}
+        {/* Hero */}
+        <LinearGradient
+          colors={['rgba(124,58,237,0.3)', 'rgba(59,130,246,0.1)', 'transparent']}
+          style={styles.hero}
+        >
+          <Text style={styles.greeting}>{getGreeting()}</Text>
+          <Text style={styles.subtitle}>
+            {todayLog
+              ? "Here's your digital vibe today"
+              : 'Ready to check in?'}
           </Text>
-        </View>
+        </LinearGradient>
 
-        <View style={styles.gaugeContainer}>
-          {todayLog ? (
-            <LoadGauge score={loadScore} />
-          ) : (
-            <View style={styles.emptyGauge}>
-              <Text style={styles.emptyGaugeText}>No data yet today</Text>
-              <Button
-                title="Log Your Digital Load"
-                onPress={() => router.push('/(tabs)/track')}
-                size="md"
-                style={{ marginTop: Spacing.md }}
-              />
-            </View>
-          )}
-        </View>
+        {/* Streak */}
+        <StreakCounter
+          streak={progress.currentStreak}
+          longestStreak={progress.longestStreak}
+        />
 
+        {/* Progress Rings */}
+        <ProgressRings
+          screenTimeProgress={
+            screenTimeGoalHours > 0
+              ? 1 - todayScreenHours / screenTimeGoalHours
+              : 0
+          }
+          moodAverage={avgMood}
+          streakProgress={progress.currentStreak / 7}
+        />
+
+        {/* Today Summary */}
         <DailySummaryCard log={todayLog} />
 
-        {activeSuggestions.length > 0 && (
-          <View style={styles.suggestionsSection}>
-            <Text style={styles.sectionTitle}>Suggestions for You</Text>
-            {activeSuggestions.map((suggestion) => (
-              <SuggestionBanner
-                key={suggestion.id}
-                suggestion={suggestion}
-                onDismiss={dismiss}
-              />
-            ))}
-          </View>
-        )}
+        {/* Weekly Story */}
+        <WeeklyStoryCard logs={recentLogs} />
 
-        {recentLogs.length > 0 && (
-          <View style={styles.statsSection}>
-            <Text style={styles.sectionTitle}>This Week</Text>
-            <View style={styles.weekStats}>
-              <View style={styles.weekStat}>
-                <Text style={styles.weekStatValue}>
-                  {Math.round(
-                    recentLogs.reduce((s, l) => s + l.screenTimeMinutes, 0) /
-                      recentLogs.length /
-                      60
-                  )}h
-                </Text>
-                <Text style={styles.weekStatLabel}>Avg Screen Time</Text>
-              </View>
-              <View style={styles.weekStat}>
-                <Text style={styles.weekStatValue}>
-                  {(
-                    recentLogs.reduce((s, l) => s + l.fatigueLevel, 0) /
-                    recentLogs.length
-                  ).toFixed(1)}
-                </Text>
-                <Text style={styles.weekStatLabel}>Avg Fatigue</Text>
-              </View>
-              <View style={styles.weekStat}>
-                <Text style={styles.weekStatValue}>
-                  {recentLogs.length}
-                </Text>
-                <Text style={styles.weekStatLabel}>Entries</Text>
-              </View>
-            </View>
-          </View>
-        )}
+        {/* Achievements */}
+        <AchievementCarousel achievements={unlockedAchievements} />
+
+        {/* Suggestions */}
+        {activeSuggestions.map((s) => (
+          <SuggestionBanner key={s.id} suggestion={s} onDismiss={dismiss} />
+        ))}
       </ScrollView>
+
+      {/* Floating Check-in Button */}
+      <TouchableOpacity
+        style={[styles.floatingBtn, Shadows.glow]}
+        onPress={() => router.push('/(tabs)/track')}
+        activeOpacity={0.8}
+      >
+        <LinearGradient
+          colors={[...Gradients.primary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.floatingBtnGradient}
+        >
+          <Text style={styles.floatingBtnText}>✨ Check In</Text>
+        </LinearGradient>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -117,63 +117,39 @@ const styles = StyleSheet.create({
   },
   scroll: {
     padding: Spacing.lg,
-    paddingBottom: Spacing.xxxl,
+    paddingBottom: 100,
   },
-  header: {
-    marginBottom: Spacing.xl,
+  hero: {
+    paddingVertical: Spacing.xxl,
+    paddingHorizontal: Spacing.lg,
+    marginHorizontal: -Spacing.lg,
+    marginTop: -Spacing.lg,
+    marginBottom: Spacing.lg,
   },
   greeting: {
-    fontSize: FontSize.xl,
+    fontSize: FontSize.xxl,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.textPrimary,
   },
-  date: {
-    fontSize: FontSize.sm,
+  subtitle: {
+    fontSize: FontSize.md,
     color: Colors.textSecondary,
     marginTop: Spacing.xs,
   },
-  gaugeContainer: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xl,
+  floatingBtn: {
+    position: 'absolute',
+    bottom: 100,
+    alignSelf: 'center',
+    borderRadius: 28,
   },
-  emptyGauge: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xxl,
+  floatingBtnGradient: {
+    paddingHorizontal: Spacing.xxl,
+    paddingVertical: Spacing.lg,
+    borderRadius: 28,
   },
-  emptyGaugeText: {
-    fontSize: FontSize.md,
-    color: Colors.textMuted,
-  },
-  suggestionsSection: {
-    marginTop: Spacing.xl,
-  },
-  sectionTitle: {
+  floatingBtnText: {
     fontSize: FontSize.lg,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: Spacing.sm,
-  },
-  statsSection: {
-    marginTop: Spacing.xl,
-  },
-  weekStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: Spacing.lg,
-  },
-  weekStat: {
-    alignItems: 'center',
-  },
-  weekStatValue: {
-    fontSize: FontSize.xl,
     fontWeight: '700',
-    color: Colors.primary,
-  },
-  weekStatLabel: {
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
-    marginTop: Spacing.xs,
+    color: '#FFFFFF',
   },
 });

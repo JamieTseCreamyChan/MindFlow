@@ -29,8 +29,8 @@ export function ConsentToggle({
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-        thumbColor={value ? Colors.primary : Colors.textMuted}
+        trackColor={{ false: Colors.surface, true: Colors.primary + '60' }}
+        thumbColor={value ? Colors.primaryLight : Colors.textMuted}
         disabled={required && value}
       />
     </View>

@@ -7,29 +7,24 @@ import { Colors } from '../src/constants/theme';
 export default function RootLayout() {
   return (
     <ConsentProvider>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: Colors.surface },
+          headerStyle: { backgroundColor: Colors.background },
           headerTintColor: Colors.textPrimary,
           headerTitleStyle: { fontWeight: '600' },
           contentStyle: { backgroundColor: Colors.background },
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="onboarding"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="(tabs)"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="crisis/index"
           options={{
             title: 'Support Resources',
             presentation: 'modal',
+            headerStyle: { backgroundColor: Colors.surfaceSolid },
           }}
         />
       </Stack>

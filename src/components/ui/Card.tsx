@@ -1,16 +1,34 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { Colors, BorderRadius, Spacing, Shadows } from '../../constants/theme';
+import { Colors, BorderRadius, Spacing, Glass } from '../../constants/theme';
 
 interface CardProps {
   children: React.ReactNode;
   style?: ViewStyle;
-  elevated?: boolean;
+  variant?: 'glass' | 'solid' | 'outlined';
 }
 
-export function Card({ children, style, elevated = true }: CardProps) {
+export function Card({ children, style, variant = 'glass' }: CardProps) {
+  const variantStyles = {
+    glass: {
+      backgroundColor: Glass.background,
+      borderWidth: Glass.borderWidth,
+      borderColor: Glass.borderColor,
+    },
+    solid: {
+      backgroundColor: Colors.surfaceSolid,
+      borderWidth: 0,
+      borderColor: 'transparent',
+    },
+    outlined: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+    },
+  };
+
   return (
-    <View style={[styles.card, elevated && Shadows.sm, style]}>
+    <View style={[styles.card, variantStyles[variant], style]}>
       {children}
     </View>
   );
@@ -18,8 +36,7 @@ export function Card({ children, style, elevated = true }: CardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
   },
 });

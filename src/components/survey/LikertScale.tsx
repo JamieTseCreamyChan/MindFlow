@@ -74,9 +74,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xs,
     borderRadius: BorderRadius.sm,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: Colors.border,
   },
   optionSelected: {
     backgroundColor: Colors.primary + '15',

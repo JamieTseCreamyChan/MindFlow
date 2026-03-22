@@ -6,13 +6,15 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Button } from '../../src/components/ui/Button';
 import { ConsentToggle } from '../../src/components/ui/ConsentToggle';
 import { useConsentContext } from '../../src/context/ConsentContext';
 import { RETENTION_OPTIONS } from '../../src/models/ConsentRecord';
-import { Colors, FontSize, Spacing, BorderRadius } from '../../src/constants/theme';
+import { Colors, Gradients, FontSize, Spacing, BorderRadius, Glass } from '../../src/constants/theme';
 
 export default function ConsentScreen() {
   const router = useRouter();
@@ -38,91 +40,95 @@ export default function ConsentScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.title}>Your Privacy Matters</Text>
-        <Text style={styles.subtitle}>
-          MindFlow is designed with your privacy in mind. Please review and
-          accept the following to continue.
-        </Text>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>How We Handle Your Data</Text>
-          <Text style={styles.body}>
-            {'\u2022'} All your tracking data is stored locally on your device{'\n'}
-            {'\u2022'} We never collect your name, email, or student ID{'\n'}
-            {'\u2022'} You can delete all your data at any time{'\n'}
-            {'\u2022'} This app does not provide clinical or medical advice{'\n'}
-            {'\u2022'} Consent can be withdrawn at any time
+    <LinearGradient colors={[...Gradients.dark]} style={styles.gradient}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>Your Privacy Matters 🔐</Text>
+          <Text style={styles.subtitle}>
+            MindFlow is designed with your privacy in mind. Review and accept
+            the following to continue.
           </Text>
-        </View>
 
-        <View style={styles.toggles}>
-          <ConsentToggle
-            label="Local Data Collection"
-            description="Allow MindFlow to store your digital load entries on your device. Required to use the app."
-            value={dataCollection}
-            onValueChange={setDataCollection}
-            required
-          />
-          <ConsentToggle
-            label="Anonymized Reporting"
-            description="Allow your anonymized data to be included in aggregated program evaluation reports. No personal information is ever shared."
-            value={anonymizedReporting}
-            onValueChange={setAnonymizedReporting}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Retention Period</Text>
-          <Text style={styles.body}>
-            Choose how long your data is kept. Older entries will be
-            automatically deleted.
-          </Text>
-          <View style={styles.retentionOptions}>
-            {RETENTION_OPTIONS.map((days) => (
-              <View
-                key={days}
-                style={[
-                  styles.retentionOption,
-                  retentionDays === days && styles.retentionSelected,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.retentionText,
-                    retentionDays === days && styles.retentionTextSelected,
-                  ]}
-                  onPress={() => setRetentionDays(days)}
-                >
-                  {days} days
-                </Text>
-              </View>
-            ))}
+          <View style={styles.glassCard}>
+            <Text style={styles.sectionTitle}>How We Handle Your Data</Text>
+            <View style={styles.bulletList}>
+              <Text style={styles.bullet}>📱 All data stored locally on your device</Text>
+              <Text style={styles.bullet}>🙈 We never collect your name, email, or ID</Text>
+              <Text style={styles.bullet}>🗑️ Delete all your data at any time</Text>
+              <Text style={styles.bullet}>⚕️ Not clinical or medical advice</Text>
+              <Text style={styles.bullet}>↩️ Consent can be withdrawn anytime</Text>
+            </View>
           </View>
-        </View>
-      </ScrollView>
 
-      <View style={styles.footer}>
-        <Button
-          title="I Understand & Agree"
-          onPress={handleAccept}
-          size="lg"
-          loading={saving}
-          style={styles.button}
-        />
-      </View>
-    </SafeAreaView>
+          <View style={styles.toggles}>
+            <ConsentToggle
+              label="Local Data Collection"
+              description="Allow MindFlow to store your digital load entries on your device. Required to use the app."
+              value={dataCollection}
+              onValueChange={setDataCollection}
+              required
+            />
+            <ConsentToggle
+              label="Anonymized Reporting"
+              description="Allow your anonymized data to be included in aggregated program evaluation reports. No personal information is ever shared."
+              value={anonymizedReporting}
+              onValueChange={setAnonymizedReporting}
+            />
+          </View>
+
+          <View style={styles.glassCard}>
+            <Text style={styles.sectionTitle}>Data Retention Period</Text>
+            <Text style={styles.body}>
+              Choose how long your data is kept. Older entries are automatically
+              deleted.
+            </Text>
+            <View style={styles.retentionOptions}>
+              {RETENTION_OPTIONS.map((days) => (
+                <TouchableOpacity
+                  key={days}
+                  onPress={() => setRetentionDays(days)}
+                  style={[
+                    styles.retentionOption,
+                    retentionDays === days && styles.retentionSelected,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.retentionText,
+                      retentionDays === days && styles.retentionTextSelected,
+                    ]}
+                  >
+                    {days} days
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <Button
+            title="I Understand & Agree"
+            onPress={handleAccept}
+            size="lg"
+            loading={saving}
+            style={styles.button}
+          />
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scroll: {
     padding: Spacing.xl,
@@ -140,19 +146,30 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: Spacing.xl,
   },
-  section: {
+  glassCard: {
+    ...Glass,
+    padding: Spacing.lg,
     marginBottom: Spacing.xl,
   },
   sectionTitle: {
     fontSize: FontSize.md,
     fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  bulletList: {
+    gap: Spacing.sm,
+  },
+  bullet: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: 22,
   },
   body: {
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
     lineHeight: 22,
+    marginBottom: Spacing.md,
   },
   toggles: {
     marginBottom: Spacing.xl,
@@ -160,7 +177,6 @@ const styles = StyleSheet.create({
   retentionOptions: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginTop: Spacing.md,
   },
   retentionOption: {
     flex: 1,
@@ -173,7 +189,7 @@ const styles = StyleSheet.create({
   },
   retentionSelected: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.primary + '10',
+    backgroundColor: Colors.primary + '15',
   },
   retentionText: {
     fontSize: FontSize.sm,
@@ -181,7 +197,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   retentionTextSelected: {
-    color: Colors.primary,
+    color: Colors.primaryLight,
   },
   footer: {
     paddingHorizontal: Spacing.xl,

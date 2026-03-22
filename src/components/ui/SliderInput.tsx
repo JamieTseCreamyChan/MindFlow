@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: FontSize.lg,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.primaryLight,
   },
   track: {
     flexDirection: 'row',
@@ -91,13 +91,17 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   dotActive: {
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.primary + '40',
+    borderColor: Colors.primary + '60',
   },
   dotCurrent: {
     backgroundColor: Colors.primary,
+    borderColor: Colors.primaryLight,
     width: 28,
     height: 28,
     borderRadius: 14,

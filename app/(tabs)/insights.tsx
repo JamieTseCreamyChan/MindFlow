@@ -6,13 +6,15 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
-  Alert,
   Share,
+  Alert,
 } from 'react-native';
 import { Card } from '../../src/components/ui/Card';
 import { Button } from '../../src/components/ui/Button';
 import { WeeklyBarChart } from '../../src/components/charts/WeeklyBarChart';
 import { MonthlyTrendLine } from '../../src/components/charts/MonthlyTrendLine';
+import { HeatMapCalendar } from '../../src/components/insights/HeatMapCalendar';
+import { WrappedCard } from '../../src/components/insights/WrappedCard';
 import { useDigitalLoad } from '../../src/hooks/useDigitalLoad';
 import { useSurvey } from '../../src/hooks/useSurvey';
 import { useConsentContext } from '../../src/context/ConsentContext';
@@ -31,8 +33,8 @@ export default function InsightsScreen() {
 
   const days = timeRange === 'week' ? 7 : 30;
   const recentLogs = getRecentLogs(days);
+  const previousLogs = getRecentLogs(days * 2).slice(days);
 
-  // Category distribution
   const categoryTotals: Record<string, number> = {};
   for (const log of recentLogs) {
     for (const entry of log.appBreakdown) {
@@ -71,7 +73,7 @@ export default function InsightsScreen() {
           <Text style={styles.emptyIcon}>📊</Text>
           <Text style={styles.emptyTitle}>No Insights Yet</Text>
           <Text style={styles.emptyText}>
-            Start tracking your digital load to see insights and trends here.
+            Start checking in to see your digital story unfold here.
           </Text>
         </View>
       </SafeAreaView>
@@ -84,6 +86,9 @@ export default function InsightsScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
+        <Text style={styles.pageTitle}>Your Digital Story</Text>
+
+        {/* Time Range Toggle */}
         <View style={styles.toggleRow}>
           {(['week', 'month'] as TimeRange[]).map((range) => (
             <TouchableOpacity
@@ -106,6 +111,15 @@ export default function InsightsScreen() {
           ))}
         </View>
 
+        {/* Wrapped Card */}
+        <WrappedCard logs={recentLogs} previousLogs={previousLogs} />
+
+        {/* Heat Map */}
+        <Card style={styles.chartCard}>
+          <HeatMapCalendar logs={logs} />
+        </Card>
+
+        {/* Screen Time Chart */}
         <Card style={styles.chartCard}>
           <WeeklyBarChart
             logs={recentLogs.slice(0, 7)}
@@ -114,6 +128,7 @@ export default function InsightsScreen() {
           />
         </Card>
 
+        {/* Trends */}
         <Card style={styles.chartCard}>
           <MonthlyTrendLine
             logs={recentLogs}
@@ -132,9 +147,10 @@ export default function InsightsScreen() {
           />
         </Card>
 
+        {/* Categories */}
         {totalCategoryTime > 0 && (
           <Card style={styles.chartCard}>
-            <Text style={styles.chartTitle}>Category Breakdown</Text>
+            <Text style={styles.chartTitle}>Categories</Text>
             {Object.entries(categoryTotals)
               .sort(([, a], [, b]) => b - a)
               .map(([category, minutes]) => {
@@ -176,8 +192,9 @@ export default function InsightsScreen() {
           </Card>
         )}
 
-        <Card style={styles.summaryCard}>
-          <Text style={styles.chartTitle}>Summary Statistics</Text>
+        {/* Summary */}
+        <Card style={styles.chartCard}>
+          <Text style={styles.chartTitle}>Summary</Text>
           <View style={styles.summaryGrid}>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryValue}>
@@ -187,7 +204,7 @@ export default function InsightsScreen() {
                     60
                 )}h
               </Text>
-              <Text style={styles.summaryLabel}>Avg Daily Screen Time</Text>
+              <Text style={styles.summaryLabel}>Avg Screen Time</Text>
             </View>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryValue}>
@@ -209,7 +226,7 @@ export default function InsightsScreen() {
             </View>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryValue}>{recentLogs.length}</Text>
-              <Text style={styles.summaryLabel}>Total Entries</Text>
+              <Text style={styles.summaryLabel}>Check-ins</Text>
             </View>
           </View>
         </Card>
@@ -229,13 +246,13 @@ export default function InsightsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scroll: {
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xxxl,
+  container: { flex: 1, backgroundColor: Colors.background },
+  scroll: { padding: Spacing.lg, paddingBottom: Spacing.xxxl },
+  pageTitle: {
+    fontSize: FontSize.xl,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.lg,
   },
   emptyContainer: {
     flex: 1,
@@ -243,10 +260,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.xxl,
   },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: Spacing.lg,
-  },
+  emptyIcon: { fontSize: 64, marginBottom: Spacing.lg },
   emptyTitle: {
     fontSize: FontSize.xl,
     fontWeight: '700',
@@ -257,7 +271,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
   },
   toggleRow: {
     flexDirection: 'row',
@@ -272,20 +285,14 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     alignItems: 'center',
   },
-  toggleBtnActive: {
-    backgroundColor: Colors.primary,
-  },
+  toggleBtnActive: { backgroundColor: Colors.primary },
   toggleText: {
     fontSize: FontSize.sm,
     fontWeight: '600',
     color: Colors.textSecondary,
   },
-  toggleTextActive: {
-    color: '#FFFFFF',
-  },
-  chartCard: {
-    marginBottom: Spacing.lg,
-  },
+  toggleTextActive: { color: '#FFFFFF' },
+  chartCard: { marginBottom: Spacing.lg },
   chartTitle: {
     fontSize: FontSize.md,
     fontWeight: '600',
@@ -297,17 +304,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.sm,
   },
-  categoryInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: 120,
-  },
-  categoryDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: Spacing.sm,
-  },
+  categoryInfo: { flexDirection: 'row', alignItems: 'center', width: 120 },
+  categoryDot: { width: 10, height: 10, borderRadius: 5, marginRight: Spacing.sm },
   categoryName: {
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
@@ -316,15 +314,12 @@ const styles = StyleSheet.create({
   categoryBar: {
     flex: 1,
     height: 8,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.surface,
     borderRadius: 4,
     marginHorizontal: Spacing.sm,
     overflow: 'hidden',
   },
-  categoryBarFill: {
-    height: 8,
-    borderRadius: 4,
-  },
+  categoryBarFill: { height: 8, borderRadius: 4 },
   categoryPct: {
     width: 40,
     fontSize: FontSize.sm,
@@ -332,30 +327,14 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontWeight: '600',
   },
-  summaryCard: {
-    marginBottom: Spacing.lg,
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  summaryItem: {
-    width: '50%',
-    paddingVertical: Spacing.md,
-    alignItems: 'center',
-  },
-  summaryValue: {
-    fontSize: FontSize.xl,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
+  summaryGrid: { flexDirection: 'row', flexWrap: 'wrap' },
+  summaryItem: { width: '50%', paddingVertical: Spacing.md, alignItems: 'center' },
+  summaryValue: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.primaryLight },
   summaryLabel: {
     fontSize: FontSize.xs,
     color: Colors.textMuted,
     marginTop: Spacing.xs,
     textAlign: 'center',
   },
-  exportBtn: {
-    marginBottom: Spacing.xl,
-  },
+  exportBtn: { marginBottom: Spacing.xl },
 });

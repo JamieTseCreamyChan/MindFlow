@@ -21,7 +21,7 @@ export function SuggestionBanner({ suggestion, onDismiss }: SuggestionBannerProp
       style={{
         ...styles.card,
         borderLeftColor: priorityColors[suggestion.priority],
-        borderLeftWidth: 4,
+        borderLeftWidth: 3,
       }}
     >
       <View style={styles.header}>
@@ -58,7 +58,7 @@ export function SuggestionBanner({ suggestion, onDismiss }: SuggestionBannerProp
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   header: {
     flexDirection: 'row',
@@ -97,6 +97,6 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: FontSize.sm,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.primaryLight,
   },
 });

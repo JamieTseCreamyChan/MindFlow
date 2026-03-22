@@ -12,9 +12,9 @@ export function DailySummaryCard({ log }: DailySummaryCardProps) {
   if (!log) {
     return (
       <Card style={styles.card}>
-        <Text style={styles.emptyTitle}>No entry today</Text>
+        <Text style={styles.emptyTitle}>No check-in yet today</Text>
         <Text style={styles.emptyText}>
-          Track your digital load to see your daily summary here.
+          Tap the Check In button to log your digital load
         </Text>
       </Card>
     );
@@ -22,18 +22,17 @@ export function DailySummaryCard({ log }: DailySummaryCardProps) {
 
   const hours = Math.floor(log.screenTimeMinutes / 60);
   const mins = log.screenTimeMinutes % 60;
-
   const moodEmojis = ['', '😔', '😕', '😐', '🙂', '😊'];
 
   return (
     <Card style={styles.card}>
-      <Text style={styles.title}>Today's Summary</Text>
+      <Text style={styles.title}>Today</Text>
       <View style={styles.statsRow}>
         <View style={styles.stat}>
           <Text style={styles.statValue}>
             {hours}h {mins}m
           </Text>
-          <Text style={styles.statLabel}>Screen Time</Text>
+          <Text style={styles.statLabel}>Screen</Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.stat}>
@@ -57,12 +56,14 @@ export function DailySummaryCard({ log }: DailySummaryCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: FontSize.md,
+    fontSize: FontSize.sm,
     fontWeight: '600',
-    color: Colors.textPrimary,
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
     marginBottom: Spacing.md,
   },
   emptyTitle: {
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: FontSize.lg,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.textPrimary,
   },
   statLabel: {
     fontSize: FontSize.xs,
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: 1,
-    height: 40,
+    height: 32,
     backgroundColor: Colors.divider,
   },
 });

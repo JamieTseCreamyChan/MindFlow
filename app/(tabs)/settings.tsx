@@ -15,16 +15,22 @@ import { Button } from '../../src/components/ui/Button';
 import { ConsentToggle } from '../../src/components/ui/ConsentToggle';
 import { useConsentContext } from '../../src/context/ConsentContext';
 import { useDigitalLoad } from '../../src/hooks/useDigitalLoad';
+import { useGamification } from '../../src/hooks/useGamification';
 import { RETENTION_OPTIONS } from '../../src/models/ConsentRecord';
+import { getLevelFromXP, ACHIEVEMENTS } from '../../src/models/Gamification';
 import { clearAll, STORAGE_KEYS, setItem } from '../../src/services/storage';
-import { Colors, FontSize, Spacing, BorderRadius } from '../../src/constants/theme';
+import { Colors, FontSize, Spacing, BorderRadius, Glass } from '../../src/constants/theme';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { consent, updateConsent, withdrawConsent, hasValidConsent } =
     useConsentContext();
   const { logs } = useDigitalLoad();
+  const { progress } = useGamification();
   const [deleting, setDeleting] = useState(false);
+
+  const level = getLevelFromXP(progress.xp);
+  const unlockedCount = progress.achievements.filter((a) => a.unlockedAt).length;
 
   const handleToggleReporting = async (value: boolean) => {
     await updateConsent({ anonymizedReporting: value });
@@ -78,6 +84,31 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
+        {/* Gamification Stats */}
+        <Card style={styles.section}>
+          <Text style={styles.sectionTitle}>Your Progress</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>Lv.{level}</Text>
+              <Text style={styles.statLabel}>Level</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{progress.xp}</Text>
+              <Text style={styles.statLabel}>Total XP</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{progress.currentStreak}🔥</Text>
+              <Text style={styles.statLabel}>Streak</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {unlockedCount}/{ACHIEVEMENTS.length}
+              </Text>
+              <Text style={styles.statLabel}>Badges</Text>
+            </View>
+          </View>
+        </Card>
+
         <Card style={styles.section}>
           <Text style={styles.sectionTitle}>Consent Management</Text>
           {consent && (
@@ -233,6 +264,23 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: Spacing.md,
   },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: FontSize.xl,
+    fontWeight: '700',
+    color: Colors.primaryLight,
+  },
+  statLabel: {
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    marginTop: Spacing.xs,
+  },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -258,14 +306,14 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.sm,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderWidth: 2,
     borderColor: Colors.border,
     alignItems: 'center',
   },
   retentionSelected: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.primary + '10',
+    backgroundColor: Colors.primary + '15',
   },
   retentionText: {
     fontSize: FontSize.xs,
@@ -273,7 +321,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   retentionTextSelected: {
-    color: Colors.primary,
+    color: Colors.primaryLight,
   },
   menuItem: {
     flexDirection: 'row',
@@ -285,7 +333,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: FontSize.md,
-    color: Colors.primary,
+    color: Colors.primaryLight,
     fontWeight: '500',
   },
   menuArrow: {
@@ -294,7 +342,7 @@ const styles = StyleSheet.create({
   },
   disclaimer: {
     fontSize: FontSize.sm,
-    color: Colors.danger,
+    color: Colors.warning,
     fontStyle: 'italic',
     marginBottom: Spacing.sm,
   },

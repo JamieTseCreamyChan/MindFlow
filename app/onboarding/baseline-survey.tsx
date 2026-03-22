@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Button } from '../../src/components/ui/Button';
 import { ProgressBar } from '../../src/components/ui/ProgressBar';
@@ -15,7 +16,7 @@ import { BASELINE_QUESTIONS } from '../../src/constants/surveyQuestions';
 import { SurveyAnswer } from '../../src/models/SurveyResponse';
 import { setItem, STORAGE_KEYS } from '../../src/services/storage';
 import { v4 as uuid } from 'uuid';
-import { Colors, FontSize, Spacing } from '../../src/constants/theme';
+import { Colors, Gradients, FontSize, Spacing } from '../../src/constants/theme';
 
 export default function BaselineSurvey() {
   const router = useRouter();
@@ -45,7 +46,6 @@ export default function BaselineSurvey() {
   };
 
   const finishOnboarding = async () => {
-    // Generate anonymous ID
     await setItem(STORAGE_KEYS.ANONYMOUS_ID, uuid());
     await setItem(STORAGE_KEYS.ONBOARDED, true);
     setSaving(false);
@@ -53,60 +53,64 @@ export default function BaselineSurvey() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.title}>Digital Belonging Survey</Text>
-        <Text style={styles.subtitle}>
-          Help us understand your digital well-being baseline. This takes about
-          2 minutes. Your responses are stored locally.
-        </Text>
-
-        <View style={styles.progressContainer}>
-          <ProgressBar progress={progress} />
-          <Text style={styles.progressText}>
-            {answeredCount} of {BASELINE_QUESTIONS.length} answered
+    <LinearGradient colors={[...Gradients.dark]} style={styles.gradient}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>Quick Vibe Check 📋</Text>
+          <Text style={styles.subtitle}>
+            Help us understand your digital well-being baseline. Takes about 2
+            minutes. Your responses are stored locally.
           </Text>
-        </View>
 
-        {BASELINE_QUESTIONS.map((q) => (
-          <LikertScale
-            key={q.id}
-            questionId={q.id}
-            questionText={q.text}
-            value={answers[q.id] ?? null}
-            onChange={handleAnswer}
+          <View style={styles.progressContainer}>
+            <ProgressBar progress={progress} />
+            <Text style={styles.progressText}>
+              {answeredCount} of {BASELINE_QUESTIONS.length} answered
+            </Text>
+          </View>
+
+          {BASELINE_QUESTIONS.map((q) => (
+            <LikertScale
+              key={q.id}
+              questionId={q.id}
+              questionText={q.text}
+              value={answers[q.id] ?? null}
+              onChange={handleAnswer}
+            />
+          ))}
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <Button
+            title="Submit Survey"
+            onPress={handleSubmit}
+            size="lg"
+            loading={saving}
+            disabled={answeredCount === 0}
+            style={styles.button}
           />
-        ))}
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <Button
-          title="Submit Survey"
-          onPress={handleSubmit}
-          size="lg"
-          loading={saving}
-          disabled={answeredCount === 0}
-          style={styles.button}
-        />
-        <Button
-          title="Skip for Now"
-          onPress={handleSkip}
-          variant="ghost"
-          size="md"
-          style={styles.skipButton}
-        />
-      </View>
-    </SafeAreaView>
+          <Button
+            title="Skip for Now"
+            onPress={handleSkip}
+            variant="ghost"
+            size="md"
+            style={styles.skipButton}
+          />
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scroll: {
     padding: Spacing.xl,

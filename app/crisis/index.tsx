@@ -32,8 +32,8 @@ export default function CrisisScreen() {
 
         <View style={styles.disclaimerBox}>
           <Text style={styles.disclaimerText}>
-            This app does not provide clinical or medical advice. If you are in
-            immediate danger, please call 000.
+            ⚠️ This app does not provide clinical or medical advice. If you are
+            in immediate danger, please call 000.
           </Text>
         </View>
 
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   disclaimerBox: {
-    backgroundColor: Colors.warningLight,
+    backgroundColor: Colors.warning + '15',
     borderRadius: BorderRadius.md,
     padding: Spacing.lg,
     marginBottom: Spacing.xl,
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   disclaimerText: {
     fontSize: FontSize.sm,
-    color: Colors.textPrimary,
+    color: Colors.warningLight,
     lineHeight: 22,
     fontWeight: '500',
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.danger,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.xl,
+    borderRadius: BorderRadius.full,
   },
   phoneBtnText: {
     color: '#FFFFFF',
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: FontSize.sm,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.primaryLight,
   },
   footer: {
     marginTop: Spacing.xl,
